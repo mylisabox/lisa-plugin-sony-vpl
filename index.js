@@ -20,7 +20,7 @@ module.exports = class SonyVPLPlugin extends Plugin {
    * @return Promise
    */
   interact(action, infos) {
-    const room = infos.fields.room
+    const room = infos.fields.room || infos.context.room
     const options = {}
     switch (action) {
       case 'VPL_ON':
