@@ -21,11 +21,17 @@ module.exports = class SonyVPLPlugin extends Plugin {
    */
   interact(action, infos) {
     const room = infos.fields.room || infos.context.room
+    const device = infos.fields.device
+    if (device && device.pluginName !== this.fullName) {
+      return Promise.resolve()
+    }
     const options = {}
     switch (action) {
+      case 'DEVICE_TURN_ON':
       case 'VPL_ON':
         options.state = 'on'
         break
+      case 'DEVICE_TURN_OFF':
       case 'VPL_OFF':
         options.state = 'off'
         break
@@ -36,12 +42,15 @@ module.exports = class SonyVPLPlugin extends Plugin {
       case 'VPL_INPUT':
         break
       default:
-        return
+        return Promise.resolve()
     }
 
     const criteria = {}
     if (room) {
       criteria.roomId = room.id
+    }
+    else if (device) {
+      return this.drivers.vpl.setAction(device, options)
     }
 
     return this.lisa.findDevices(criteria).then(devices => {
