@@ -127,6 +127,7 @@ module.exports = class VplDriver extends Driver {
       if (device) {
         device.privateData = this._getDevicePrivateData(serial, remote)
         device.data = this._getDeviceData(power)
+        device.template = require('../widgets/projector.json')
       }
       else {
         device = {
