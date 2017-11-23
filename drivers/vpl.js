@@ -3,6 +3,7 @@
 const Driver = require('lisa-plugin').Driver
 const PORT = 53862
 const { commands, powerStatus, SdcpClient } = require('sony-sdcp-com')
+const sdcpClient = SdcpClient
 const { inputs } = require('../lib/commands')
 const dgram = require('dgram')
 
@@ -48,7 +49,7 @@ module.exports = class VplDriver extends Driver {
   getDevicesData(devices) {
     const getData = []
     for (const device of devices) {
-      const api = SdcpClient({ port: device.privateData.port, address: device.privateData.address })
+      const api = sdcpClient({ port: device.privateData.port, address: device.privateData.address })
       getData.push(api.getPower())
     }
     return Promise.all(getData).then(data => {
@@ -78,7 +79,7 @@ module.exports = class VplDriver extends Driver {
   }
 
   setAction(device, options) {
-    const api = SdcpClient({ port: device.privateData.port, address: device.privateData.address }, this.log)
+    const api = sdcpClient({ port: device.privateData.port, address: device.privateData.address }, this.log)
     let action, data
 
     if (options.input1) {
