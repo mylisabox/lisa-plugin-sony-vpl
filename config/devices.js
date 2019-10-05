@@ -15,28 +15,33 @@ module.exports = [
     type: 'other',
     template: template,
     image: 'projector.png',
-    settings: [
-      {
-        controlType: 'textbox',
-        type: 'ip',
-        name: 'address',
-        label: {
-          en: 'IP address'
+    settings: {
+      'type': 'column',
+      'padding': 16,
+      'crossAxisAlignment': 3,
+      'children': [
+        {
+          controlType: 'textbox',
+          type: 'ip',
+          name: 'address',
+          label: {
+            en: 'IP address'
+          },
+          required: true,
+          private: true
         },
-        required: true,
-        private: true
-      },
-      {
-        controlType: 'textbox',
-        type: 'number',
-        name: 'port',
-        label: {
-          en: 'Port'
-        },
-        defaultValue: 53484,
-        required: true,
-        private: true
-      }
-    ]
+        {
+          controlType: 'textbox',
+          type: 'number',
+          name: 'port',
+          label: {
+            en: 'Port'
+          },
+          defaultValue: 53484,
+          required: true,
+          private: true
+        }
+      ],
+    }
   }
 ]
