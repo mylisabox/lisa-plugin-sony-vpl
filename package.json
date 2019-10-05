@@ -3,7 +3,9 @@
   "main": "index.js",
   "version": "0.0.1",
   "scripts": {
-    "test": "eslint --fix . && mocha"
+    "test": "eslint --fix . && mocha",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "eslintConfig": {
     "extends": "trails",
@@ -13,11 +15,13 @@
   },
   "dependencies": {
     "lisa-plugin": "^0.0.15",
-    "sony-sdcp-com": "^0.0.2"
+    "sony-sdcp-com": "^0.0.2",
+    "snyk": "^1.231.0"
   },
   "devDependencies": {
     "eslint": "^6.4.0",
     "eslint-config-trails": "^3.1.0",
     "mocha": "^6.2.0"
-  }
+  },
+  "snyk": true
 }
