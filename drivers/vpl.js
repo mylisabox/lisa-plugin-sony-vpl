@@ -49,7 +49,7 @@ module.exports = class VplDriver extends Driver {
   getDevicesData(devices) {
     const getData = []
     for (const device of devices) {
-      const api = sdcpClient({ port: device.privateData.port, address: device.privateData.address })
+      const api = sdcpClient({ port: device.data.port, address: device.data.address })
       getData.push(api.getPower())
     }
     return Promise.all(getData).then(data => {
@@ -79,14 +79,14 @@ module.exports = class VplDriver extends Driver {
   }
 
   setAction(device, options) {
-    const api = sdcpClient({ port: device.privateData.port, address: device.privateData.address }, this.log)
+    const api = sdcpClient({ port: device.data.port, address: device.data.address }, this.log)
     let action, data
 
-    if (options.input1) {
+    if (options.input1 !== undefined) {
       action = commands.INPUT
       data = inputs.HDMI1
     }
-    else if (options.input2) {
+    else if (options.input2 !== undefined) {
       action = commands.INPUT
       data = inputs.HDMI2
     }
@@ -126,7 +126,7 @@ module.exports = class VplDriver extends Driver {
       let device = devices.find(device => device.privateData.serial === serial)
 
       if (device) {
-        device.privateData = this._getDevicePrivateData(serial, remote)
+        device.privateData = this._getDevicePrivateData(serial)
         device.data = this._getDeviceData(power)
         device.template = require('../widgets/projector.json')
       }
@@ -134,11 +134,14 @@ module.exports = class VplDriver extends Driver {
         device = {
           name: name,
           driver: 'vpl',
-          privateData: this._getDevicePrivateData(serial, remote),
+          privateData: this._getDevicePrivateData(serial),
           data: this._getDeviceData(power),
           template: require('../widgets/projector.json')
         }
       }
+
+      device.data.port = 53484
+      device.data.address = remote.address
 
       return this.lisa.createOrUpdateDevices(device)
     })
@@ -153,11 +156,9 @@ module.exports = class VplDriver extends Driver {
     }
   }
 
-  _getDevicePrivateData(serial, remote) {
+  _getDevicePrivateData(serial) {
     return {
       serial: serial,
-      port: 53484,
-      address: remote.address
     }
   }
 }

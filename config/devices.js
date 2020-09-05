@@ -32,9 +32,9 @@ module.exports = [
           'type': 'text_field',
           'id': 'port',
           'required': true,
-          'maxLength': 4,
+          'maxLength': 5,
           'minLength': 2,
-          'textInputAction': 6,
+          'textInputAction': 2,
           'value': '53484',
           'decoration': {
             'labelText': 'Port*',
