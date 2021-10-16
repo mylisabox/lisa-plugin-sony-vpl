@@ -1,4 +1,4 @@
-{
+export default {
   "name": "SONY VPL projectors",
   "freeStates": {
     "VPL_ON": {

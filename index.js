@@ -1,13 +1,18 @@
-'use strict'
+import {Plugin} from 'lisa-plugin';
+import {createRequire} from 'module';
+import bots from './bots/index.js';
 
-const Plugin = require('lisa-plugin')
+import config from './config/index.js';
+import drivers from './drivers/index.js';
 
-module.exports = class SonyVPLPlugin extends Plugin {
+const require = createRequire(import.meta.url);
+const pkg = require('./package.json');
 
+export default class SonyVPLPlugin extends Plugin {
   /**
    * Initialisation of your plugin
    * Called once, when plugin is loaded
-   * @returns Promise
+   * @return Promise
    */
   init() {
     return super.init()
@@ -27,22 +32,22 @@ module.exports = class SonyVPLPlugin extends Plugin {
     }
     const options = {}
     switch (action) {
-      case 'DEVICE_TURN_ON':
-      case 'VPL_ON':
-        options.state = 'on'
-        break
-      case 'DEVICE_TURN_OFF':
-      case 'VPL_OFF':
-        options.state = 'off'
-        break
-      case 'VPL_RATIO':
-        break
-      case 'VPL_PRESET':
-        break
-      case 'VPL_INPUT':
-        break
-      default:
-        return Promise.resolve()
+    case 'DEVICE_TURN_ON':
+    case 'VPL_ON':
+      options.state = 'on'
+      break
+    case 'DEVICE_TURN_OFF':
+    case 'VPL_OFF':
+      options.state = 'off'
+      break
+    case 'VPL_RATIO':
+      break
+    case 'VPL_PRESET':
+      break
+    case 'VPL_INPUT':
+      break
+    default:
+      return Promise.resolve()
     }
 
     const criteria = {}
@@ -53,9 +58,9 @@ module.exports = class SonyVPLPlugin extends Plugin {
       return this.drivers.vpl.setAction(device, options)
     }
 
-    return this.lisa.findDevices(criteria).then(devices => {
+    return this.lisa.findDevices(criteria).then((devices) => {
       const setStates = []
-      devices.forEach(device => {
+      devices.forEach((device) => {
         setStates.push(this.drivers.vpl.setAction(device, options))
       })
       return Promise.all(setStates)
@@ -68,10 +73,10 @@ module.exports = class SonyVPLPlugin extends Plugin {
 
   constructor(app) {
     super(app, {
-      drivers: require('./drivers'),
-      pkg: require('./package'),
-      config: require('./config'),
-      bots: require('./bots')
+      drivers: drivers,
+      pkg: pkg,
+      config: config,
+      bots: bots,
     })
   }
 }

@@ -1,13 +1,19 @@
-'use strict'
+import dgram from 'dgram';
+import {Driver} from 'lisa-plugin';
+import {createRequire} from 'module';
+import pkg from 'sony-sdcp-com';
+import {inputs} from '../lib/commands.js';
 
-const Driver = require('lisa-plugin').Driver
-const PORT = 53862
-const { commands, powerStatus, SdcpClient } = require('sony-sdcp-com')
-const sdcpClient = SdcpClient
-const { inputs } = require('../lib/commands')
-const dgram = require('dgram')
+const {commands, powerStatus, SdcpClient} = pkg;
+const delay = time => new Promise(res=>setTimeout(res,time));
 
-module.exports = class VplDriver extends Driver {
+const PORT = 53862;
+const sdcpClient = SdcpClient;
+const require = createRequire(import.meta.url);
+
+const template = require('../widgets/projector.json');
+
+export default class VplDriver extends Driver {
   init() {
     if (this._refreshInterval) {
       clearInterval(this._refreshInterval)
@@ -21,7 +27,7 @@ module.exports = class VplDriver extends Driver {
   _search() {
     if (!this.listening) {
       this.listening = true
-      this.server = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+      this.server = dgram.createSocket({type: 'udp4', reuseAddr: true})
 
       this.server.on('message', (message, remote) => {
         if (message.length === 50) {
@@ -37,7 +43,7 @@ module.exports = class VplDriver extends Driver {
   }
 
   saveDevice(deviceData) {
-    return this.getDevicesData([deviceData]).then(data => {
+    return this.getDevicesData([deviceData]).then((data) => {
       return this.lisa.createOrUpdateDevices(data[0])
     })
   }
@@ -49,12 +55,18 @@ module.exports = class VplDriver extends Driver {
   getDevicesData(devices) {
     const getData = []
     for (const device of devices) {
-      const api = sdcpClient({ port: device.data.port, address: device.data.address })
+      const api = sdcpClient({port: device.data.port, address: device.data.address})
       getData.push(api.getPower())
     }
-    return Promise.all(getData).then(data => {
+    return Promise.all(getData).then((data) => {
       for (let i = 0; i < data.length; i++) {
         const power = data[i]
+        const powered = this._isPowered(power)
+        devices[i].powered = powered;
+        devices[i].imageOn = 'smart_tv_on.svg';
+        devices[i].imageOff = 'smart_tv_off.svg';
+        devices[i].defaultAction = powered ? 'Turn off' : 'Turn on';
+        devices[i].template = template;
         Object.assign(devices[i].data, this._getDeviceData(power))
       }
       return devices
@@ -66,12 +78,12 @@ module.exports = class VplDriver extends Driver {
     options[key] = newValue
     return this.setAction(device, options)
       .then(() => this.getDevicesData([device])
-        .then(devices => {
+        .then((devices) => {
           const device = devices[0]
           device.data[key] = newValue
           return device
         })
-        .then(data => this.lisa.createOrUpdateDevices(data)))
+        .then((data) => this.lisa.createOrUpdateDevices(data)))
   }
 
   setDevicesValue(devices, key, newValue) {
@@ -79,8 +91,9 @@ module.exports = class VplDriver extends Driver {
   }
 
   setAction(device, options) {
-    const api = sdcpClient({ port: device.data.port, address: device.data.address }, this.log)
-    let action, data
+    const api = sdcpClient({port: device.data.port, address: device.data.address}, this.log)
+    let action;
+    let data
 
     if (options.input1 !== undefined) {
       action = commands.INPUT
@@ -90,9 +103,9 @@ module.exports = class VplDriver extends Driver {
       action = commands.INPUT
       data = inputs.HDMI2
     }
-    else if (options.state) {
+    else if (options.powered !== undefined) {
       action = commands.SET_POWER
-      data = options.state === 'on' ? powerStatus.START_UP : (options.state === 'off' ? powerStatus.STANDBY : options.state)
+      data = options.powered ? powerStatus.START_UP : powerStatus.STANDBY
     }
     if (!data || !action) {
       return Promise.reject(new Error('Wrong command!'))
@@ -111,32 +124,49 @@ module.exports = class VplDriver extends Driver {
     return Promise.resolve()
   }
 
+  async triggerDevice(device) {
+    await this.setDeviceValue(device, 'powered', !device.powered);
+    device.powered = !device.powered;
+    device.defaultAction = device.powered ? 'Turn off' : 'Turn on';
+    await this.lisa.createOrUpdateDevices(device)
+  }
+
   _manageProjector(message, remote) {
-    //const header = message.subarray(0, 4)
-    //const id = String.fromCharCode.apply(null, header.subarray(0, 2))
-    //const version = header[2]
-    //const cat = String.fromCharCode.apply(null, header.subarray(3, 4))
-    //const community = String.fromCharCode.apply(null, message.subarray(4, 8))
+    // const header = message.subarray(0, 4)
+    // const id = String.fromCharCode.apply(null, header.subarray(0, 2))
+    // const version = header[2]
+    // const cat = String.fromCharCode.apply(null, header.subarray(3, 4))
+    // const community = String.fromCharCode.apply(null, message.subarray(4, 8))
     const name = String.fromCharCode.apply(null, message.subarray(8, 20)).replace(new RegExp('\u0000', 'g'), '')
     const serial = Buffer.from(message.subarray(20, 24)).toString('hex')
     const power = Buffer.from(message.subarray(24, 26)).toString('hex')
-    //const location = String.fromCharCode.apply(null, message.subarray(26, 50))
+    // const location = String.fromCharCode.apply(null, message.subarray(26, 50))
 
-    return this.lisa.findDevices().then(devices => {
-      let device = devices.find(device => device.privateData.serial === serial)
+    return this.lisa.findDevices().then((devices) => {
+      let device = devices.find((device) => device.privateData.serial === serial)
+
+      let powered = this._isPowered(power);
 
       if (device) {
-        device.privateData = this._getDevicePrivateData(serial)
-        device.data = this._getDeviceData(power)
-        device.template = require('../widgets/projector.json')
+        device.privateData = this._getDevicePrivateData(serial);
+        device.data = this._getDeviceData(power);
+        device.powered = powered;
+        device.defaultAction = powered ? 'Turn off' : 'Turn on';
+        device.imageOn = 'smart_tv_on.svg';
+        device.imageOff = 'smart_tv_off.svg';
+        device.template = template;
       }
       else {
         device = {
           name: name,
           driver: 'vpl',
+          powered: powered,
+          imageOn: 'smart_tv_on.svg',
+          imageOff: 'smart_tv_off.svg',
+          defaultAction: powered ? 'Turn off' : 'Turn on',
           privateData: this._getDevicePrivateData(serial),
           data: this._getDeviceData(power),
-          template: require('../widgets/projector.json')
+          template: template
         }
       }
 
@@ -147,12 +177,16 @@ module.exports = class VplDriver extends Driver {
     })
   }
 
+  _isPowered(power) {
+    return power === powerStatus.POWER_ON || power === powerStatus.START_UP || power === powerStatus.START_UP_LAMP ||
+      power === 'ON' || power === 'WARMING';
+  }
+
   _getDeviceData(power) {
     return {
-      power: power === powerStatus.POWER_ON || power === powerStatus.START_UP || power === powerStatus.START_UP_LAMP ||
-      power === 'ON' || power === 'WARMING' ?
-        'on' : 'off',
-      values: { 'off': '/images/widgets/tv_off.png', 'on': '/images/widgets/tv_on.png' }
+      powered: this._isPowered(power) ?
+        'true' : 'false',
+      values: {'false': '/images/widgets/smart_tv_off.svg', 'true': '/images/widgets/smart_tv_on.svg'},
     }
   }
 

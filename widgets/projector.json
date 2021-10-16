@@ -11,10 +11,10 @@
         },
         {
           "type": "image_button",
-          "id": "state",
+          "id": "powered",
           "mainIndicator": true,
           "values": "$values$",
-          "value": "$power$",
+          "value": "$powered$",
           "flex": 2
         },
         {

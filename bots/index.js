@@ -1,1 +1,3 @@
-exports.projector = require('./projector.json')
+import projector from './projector.js';
+
+export default {projector}

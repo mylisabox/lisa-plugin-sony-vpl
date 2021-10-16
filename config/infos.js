@@ -1,10 +1,10 @@
-module.exports = {
+export default {
   name: {
     en: 'Sony VPL projector',
-    fr: 'Projecteur Sony VPL'
+    fr: 'Projecteur Sony VPL',
   },
   description: {
     en: 'Manage Sony VPL projectors',
-    fr: 'Gestion des projecteur Sony VPL'
-  }
+    fr: 'Gestion des projecteur Sony VPL',
+  },
 }

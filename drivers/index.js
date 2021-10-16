@@ -1,1 +1,5 @@
-exports.vpl = require('./vpl')
+import vpl from './vpl.js';
+
+export default {
+  'vpl': vpl,
+};

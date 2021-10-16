@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "lisa-plugin-sony-vpl",
   "main": "index.js",
   "version": "0.0.1",
@@ -6,18 +7,18 @@
     "test": "eslint --fix . && mocha"
   },
   "eslintConfig": {
-    "extends": "trails",
+    "extends": "google",
     "rules": {
       "no-control-regex": "off"
     }
   },
   "dependencies": {
-    "lisa-plugin": "^0.0.15",
+    "lisa-plugin": "^0.1.2",
     "sony-sdcp-com": "^0.0.2"
   },
   "devDependencies": {
-    "eslint": "^6.4.0",
-    "eslint-config-trails": "^3.1.0",
-    "mocha": "^6.2.0"
+    "eslint": "^7.32.0",
+    "eslint-config-google": "^0.14.0",
+    "mocha": "^9.1.1"
   }
 }

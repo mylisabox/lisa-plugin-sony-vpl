@@ -1,19 +1,28 @@
+import {createRequire} from 'module';
+
+const require = createRequire(import.meta.url);
 const template = require('../widgets/projector.json')
 
-module.exports = [
+export default [
   {
     pairing: 'settings',
     name: {
       en: 'Sony VPL projector',
-      fr: 'Projecteur Sony VPL'
+      fr: 'Projecteur Sony VPL',
     },
     description: {
       en: 'Add Sony VPL projector',
-      fr: 'Ajout d\'un projecteur Sony VPL'
+      fr: 'Ajout d\'un projecteur Sony VPL',
     },
     driver: 'vpl',
     type: 'other',
     template: template,
+    imageOn: 'smart_tv_on.svg',
+    imageOff: 'smart_tv_off.svg',
+    defaultAction: {
+      en: 'Turn on',
+      fr: 'Allumer',
+    },
     image: 'projector.png',
     settings: {
       'type': 'column',
@@ -26,7 +35,7 @@ module.exports = [
           'textInputAction': 6,
           'decoration': {
             'labelText': 'IP address*',
-          }
+          },
         },
         {
           'type': 'text_field',
@@ -38,9 +47,9 @@ module.exports = [
           'value': '53484',
           'decoration': {
             'labelText': 'Port*',
-          }
+          },
         },
       ],
-    }
-  }
+    },
+  },
 ]
