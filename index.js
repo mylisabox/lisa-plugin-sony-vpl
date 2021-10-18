@@ -34,11 +34,11 @@ export default class SonyVPLPlugin extends Plugin {
     switch (action) {
     case 'DEVICE_TURN_ON':
     case 'VPL_ON':
-      options.state = 'on'
+      options.powered = true
       break
     case 'DEVICE_TURN_OFF':
     case 'VPL_OFF':
-      options.state = 'off'
+      options.powered = false
       break
     case 'VPL_RATIO':
       break

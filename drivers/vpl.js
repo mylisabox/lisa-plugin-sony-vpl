@@ -20,7 +20,7 @@ export default class VplDriver extends Driver {
       this._refreshInterval = null
     }
 
-    this._refreshInterval = setInterval(this._search.bind(this), 60000)
+    this._refreshInterval = setInterval(this._search.bind(this), 300000)
     return this._search()
   }
 
